@@ -58,7 +58,7 @@ struct TagInputView: View {
         Button(action: confirmTag) {
           Image(systemName: "checkmark")
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(Color(hex: "E07A5F"))
+            .foregroundStyle(Color("AccentPrimary"))
         }
         .buttonStyle(.plain)
         .opacity(isExpanded ? 1 : 0)
@@ -138,7 +138,7 @@ struct TagInputView: View {
 
     var body: some View {
       ZStack {
-        Color(hex: "FFE5D9").ignoresSafeArea()
+        Color("AppBackground").ignoresSafeArea()
         VStack(spacing: 40) {
           TagInputView(
             isExpanded: $isExpanded,

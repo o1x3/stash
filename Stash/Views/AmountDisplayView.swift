@@ -43,7 +43,7 @@ struct AmountDisplayView: View {
 
         // Animated cursor line (blinking)
         Rectangle()
-          .fill(Color(hex: "E07A5F"))
+          .fill(Color("AccentPrimary"))
           .frame(width: 3, height: 56)
           .opacity(cursorOpacity)
           .animation(
@@ -62,7 +62,7 @@ struct AmountDisplayView: View {
 
 #Preview {
   ZStack {
-    Color(hex: "FFE5D9").ignoresSafeArea()
+    Color("AppBackground").ignoresSafeArea()
     VStack(spacing: 20) {
       AmountDisplayView(amount: "0")
       AmountDisplayView(amount: "4.20")

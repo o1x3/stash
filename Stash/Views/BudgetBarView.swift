@@ -46,7 +46,7 @@ struct BudgetBarView: View {
           Spacer()
           Text(formattedBudget)
             .fontWeight(.semibold)
-            .foregroundStyle(isOverBudget ? Color(hex: "F44336") : .primary)
+            .foregroundStyle(isOverBudget ? Color("BudgetRed") : .primary)
             .contentTransition(.numericText())
             .animation(.spring(response: 0.4, dampingFraction: 0.8), value: remainingBudget)
         }
@@ -60,30 +60,30 @@ struct BudgetBarView: View {
 
 #Preview {
   ZStack {
-    Color(hex: "FFE5D9").ignoresSafeArea()
+    Color("AppBackground").ignoresSafeArea()
     VStack(spacing: 20) {
       BudgetBarView(
         remainingBudget: 75.50,
         percentage: 0.755,
-        budgetColor: Color(hex: "4CAF50"),
+        budgetColor: Color("BudgetGreen"),
         isOverBudget: false
       )
       BudgetBarView(
         remainingBudget: 35.00,
         percentage: 0.35,
-        budgetColor: Color(hex: "FFC107"),
+        budgetColor: Color("BudgetYellow"),
         isOverBudget: false
       )
       BudgetBarView(
         remainingBudget: 15.00,
         percentage: 0.15,
-        budgetColor: Color(hex: "F44336"),
+        budgetColor: Color("BudgetRed"),
         isOverBudget: false
       )
       BudgetBarView(
         remainingBudget: -10.00,
         percentage: 0,
-        budgetColor: Color(hex: "FFCDD2"),
+        budgetColor: Color("BudgetOverRed"),
         isOverBudget: true
       )
     }

@@ -96,7 +96,7 @@ struct DeleteButton: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     .frame(height: 56)
-    .buttonStyle(NumberPadButtonStyle(tintColor: Color(hex: "E07A5F").opacity(0.3)))
+    .buttonStyle(NumberPadButtonStyle(tintColor: Color("AccentPrimary").opacity(0.3)))
   }
 }
 
@@ -138,9 +138,9 @@ struct ConfirmButtonStyle: ButtonStyle {
     configuration.label
       .background {
         Capsule()
-          .fill(Color(hex: "E07A5F"))
+          .fill(Color("AccentPrimary"))
       }
-      .glassEffect(.regular.tint(Color(hex: "E07A5F")).interactive(), in: .capsule)
+      .glassEffect(.regular.tint(Color("AccentPrimary")).interactive(), in: .capsule)
       .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
       .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
   }
@@ -148,7 +148,7 @@ struct ConfirmButtonStyle: ButtonStyle {
 
 #Preview {
   ZStack {
-    Color(hex: "FFE5D9").ignoresSafeArea()
+    Color("AppBackground").ignoresSafeArea()
     NumberPadView(
       onDigit: { _ in },
       onDelete: {},

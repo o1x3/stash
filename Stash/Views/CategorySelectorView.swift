@@ -46,7 +46,7 @@ struct CategoryPill: View {
       .padding(.vertical, 12)
       .glassEffect(
         isSelected
-          ? .regular.tint(Color(hex: "E07A5F")).interactive()
+          ? .regular.tint(Color("AccentPrimary")).interactive()
           : .regular.interactive(),
         in: .capsule
       )
@@ -55,7 +55,7 @@ struct CategoryPill: View {
 
 #Preview {
   ZStack {
-    Color(hex: "FFE5D9").ignoresSafeArea()
+    Color("AppBackground").ignoresSafeArea()
     CategorySelectorView(selectedCategory: .constant(.food), onSelect: {})
   }
 }

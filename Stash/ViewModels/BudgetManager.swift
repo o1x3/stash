@@ -32,13 +32,13 @@ final class BudgetManager {
   var budgetColor: Color {
     let percentage = remainingBudget / dailyBudget
     if percentage <= 0 {
-      return Color(hex: "FFCDD2")
+      return Color("BudgetOverRed")
     } else if percentage <= 0.25 {
-      return Color(hex: "F44336")
+      return Color("BudgetRed")
     } else if percentage <= 0.5 {
-      return Color(hex: "FFC107")
+      return Color("BudgetYellow")
     } else {
-      return Color(hex: "4CAF50")
+      return Color("BudgetGreen")
     }
   }
 
