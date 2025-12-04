@@ -13,13 +13,9 @@ struct TagInputView: View {
   // Local state for text editing
   @State private var tagText: String = ""
 
-  // Namespace for glass effect morphing
-  @Namespace private var glassNamespace
-
   // Constants
   private let defaultTag = "Tag"
   private let expandedWidth: CGFloat = 240
-  private let collapsedMaxWidth: CGFloat = 150
   private let height: CGFloat = 40
   private let maxDisplayLength = 20
 
@@ -27,78 +23,63 @@ struct TagInputView: View {
     HStack {
       Spacer()
 
-      GlassEffectContainer(spacing: 20) {
-        if isExpanded {
-          expandedPillContent
-            .glassEffect(.regular.interactive(), in: .capsule)
-            .glassEffectID("tagPill", in: glassNamespace)
-        } else {
-          collapsedPillContent
-            .glassEffect(.regular.interactive(), in: .capsule)
-            .glassEffectID("tagPill", in: glassNamespace)
+      HStack(spacing: 8) {
+        // Tag icon - stable, no animation
+        Image(systemName: "tag")
+          .font(.subheadline)
+          .foregroundStyle(.primary.opacity(0.7))
+          .animation(nil, value: isExpanded)
+
+        // Collapsed label - slides left into icon, then shrinks
+        Text(truncatedSavedName)
+          .font(.subheadline)
+          .fontWeight(.medium)
+          .foregroundStyle(.primary)
+          .lineLimit(1)
+          .offset(x: isExpanded ? -30 : 0)
+          .scaleEffect(isExpanded ? 0.3 : 1, anchor: .leading)
+          .opacity(isExpanded ? 0 : 1)
+          .frame(width: isExpanded ? 0 : nil, alignment: .leading)
+          .animation(.smooth(duration: 0.45), value: isExpanded)
+
+        // TextField - shrinks to 0 when collapsed
+        TextField("", text: $tagText)
+          .font(.subheadline)
+          .textFieldStyle(.plain)
+          .focused(isFocused)
+          .opacity(isExpanded ? 1 : 0)
+          .frame(width: isExpanded ? nil : 0, alignment: .leading)
+          .frame(minWidth: isExpanded ? 30 : 0)
+          .clipped()
+          .allowsHitTesting(isExpanded)
+          .onSubmit { confirmTag() }
+
+        // Checkmark button - always present but hidden when collapsed
+        Button(action: confirmTag) {
+          Image(systemName: "checkmark")
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(Color(hex: "E07A5F"))
+        }
+        .buttonStyle(.plain)
+        .opacity(isExpanded ? 1 : 0)
+        .frame(width: isExpanded ? nil : 0)
+        .clipped()
+        .allowsHitTesting(isExpanded)
+      }
+      .padding(.horizontal, 12)
+      .padding(.vertical, 8)
+      .frame(height: height)
+      .fixedSize(horizontal: !isExpanded, vertical: false)
+      .frame(width: isExpanded ? expandedWidth : nil)
+      .glassEffect(.regular.interactive(), in: .capsule)
+      .contentShape(Capsule())
+      .onTapGesture {
+        if !isExpanded {
+          expandTag()
         }
       }
     }
-    .animation(.easeOut(duration: 0.3), value: isExpanded)
-  }
-
-  // MARK: - Pill Contents
-
-  /// Expanded state: tag icon + text field + checkmark
-  private var expandedPillContent: some View {
-    HStack(spacing: 8) {
-      // Tag icon
-      Image(systemName: "tag")
-        .font(.subheadline)
-        .foregroundStyle(.primary.opacity(0.7))
-
-      // TextField with placeholder
-      TextField("Tag", text: $tagText)
-        .font(.subheadline)
-        .textFieldStyle(.plain)
-        .focused(isFocused)
-        .onSubmit { confirmTag() }
-        .transition(.opacity.combined(with: .move(edge: .trailing)))
-
-      // Checkmark button
-      Button(action: confirmTag) {
-        Image(systemName: "checkmark")
-          .font(.subheadline.weight(.semibold))
-          .foregroundStyle(Color(hex: "E07A5F"))
-      }
-      .buttonStyle(.plain)
-      .transition(.opacity)
-    }
-    .padding(.horizontal, 12)
-    .padding(.vertical, 8)
-    .frame(width: expandedWidth)
-    .frame(height: height)
-    .contentShape(Capsule())
-  }
-
-  /// Collapsed state: tag icon + saved name
-  private var collapsedPillContent: some View {
-    HStack(spacing: 8) {
-      // Tag icon
-      Image(systemName: "tag")
-        .font(.subheadline)
-        .foregroundStyle(.primary.opacity(0.7))
-
-      // Saved tag name
-      Text(truncatedSavedName)
-        .font(.subheadline)
-        .fontWeight(.medium)
-        .foregroundStyle(.primary)
-        .lineLimit(1)
-        .transition(.opacity.combined(with: .move(edge: .leading)))
-    }
-    .padding(.horizontal, 12)
-    .padding(.vertical, 8)
-    .frame(height: height)
-    .contentShape(Capsule())
-    .onTapGesture {
-      expandTag()
-    }
+    .animation(.smooth(duration: 0.35), value: isExpanded)
   }
 
   // MARK: - Computed Properties
@@ -120,13 +101,10 @@ struct TagInputView: View {
       tagText = savedTagName
     }
 
-    // Trigger expansion
-    withAnimation(.easeOut(duration: 0.3)) {
-      isExpanded = true
-    }
+    isExpanded = true
 
-    // Focus after animation begins
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+    // Focus after animation settles
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
       isFocused.wrappedValue = true
     }
   }
@@ -142,18 +120,13 @@ struct TagInputView: View {
     // 3. Update savedTagName
     savedTagName = newTagName
 
-    // 4. Haptic feedback (immediate)
+    // 4. Haptic feedback
     UIImpactFeedbackGenerator(style: .light).impactOccurred()
 
-    // 5. Start collapse animation after brief delay
+    // 5. Collapse
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-      withAnimation(.easeOut(duration: 0.3)) {
-        isExpanded = false
-      }
+      isExpanded = false
     }
-
-    // NOTE: tagText is NOT cleared here - it will be reset in expandTag()
-    // This prevents the flickering issue caused by mid-animation state changes
   }
 }
 
