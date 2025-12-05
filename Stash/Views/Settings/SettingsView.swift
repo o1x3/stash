@@ -249,15 +249,7 @@ struct SettingsView: View {
             // Progress arc
             Circle()
                 .trim(from: 0, to: min(percentage, 1.0))
-                .stroke(
-                    AngularGradient(
-                        colors: [color.opacity(0.5), color],
-                        center: .center,
-                        startAngle: .degrees(0),
-                        endAngle: .degrees(360 * percentage)
-                    ),
-                    style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                )
+                .stroke(color, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .animation(SettingsAnimation.smooth, value: percentage)
 
