@@ -8,6 +8,7 @@ import SwiftUI
 struct NumberPadView: View {
   let onDigit: (String) -> Void
   let onDelete: () -> Void
+  let onClearAll: () -> Void
   let onConfirm: () -> Void
 
   // Reusable haptic generators - created once, reused for all taps
@@ -51,7 +52,8 @@ struct NumberPadView: View {
         // Right side: Delete + Confirm stack
         VStack(spacing: buttonSpacing) {
           // Delete button (single row height)
-          DeleteButton(haptic: lightHaptic) { onDelete() }
+          // Tap to delete one digit, long press to clear all
+          DeleteButton(haptic: lightHaptic, onDelete: onDelete, onClearAll: onClearAll)
 
           // Confirm button (spans remaining 3 rows)
           ConfirmButton(haptic: mediumHaptic) { onConfirm() }
@@ -95,22 +97,36 @@ struct NumberButton: View {
 
 struct DeleteButton: View {
   let haptic: UIImpactFeedbackGenerator
-  let action: () -> Void
+  let onDelete: () -> Void
+  let onClearAll: () -> Void
+
+  private let heavyHaptic = UIImpactFeedbackGenerator(style: .heavy)
 
   var body: some View {
-    Button(action: {
-      haptic.impactOccurred()
-      haptic.prepare()  // Re-prepare for next rapid tap
-      action()
-    }) {
-      Image(systemName: "delete.left")
-        .font(.title2)
-        .fontWeight(.medium)
-        .foregroundStyle(.primary)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-    .frame(height: 56)
-    .buttonStyle(NumberPadButtonStyle(tintColor: Color("AccentPrimary").opacity(0.5)))
+    Image(systemName: "delete.left")
+      .font(.title2)
+      .fontWeight(.medium)
+      .foregroundStyle(.primary)
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .frame(height: 56)
+      .background {
+        Capsule()
+          .fill(Color("AccentPrimary").opacity(0.5))
+      }
+      .glassEffect(.regular.interactive(), in: .capsule)
+      .onTapGesture {
+        haptic.impactOccurred()
+        haptic.prepare()
+        onDelete()
+      }
+      .onLongPressGesture(minimumDuration: 0.5) {
+        heavyHaptic.impactOccurred()
+        heavyHaptic.prepare()
+        onClearAll()
+      }
+      .onAppear {
+        heavyHaptic.prepare()
+      }
   }
 }
 
@@ -168,6 +184,7 @@ struct ConfirmButtonStyle: ButtonStyle {
     NumberPadView(
       onDigit: { _ in },
       onDelete: {},
+      onClearAll: {},
       onConfirm: {}
     )
   }

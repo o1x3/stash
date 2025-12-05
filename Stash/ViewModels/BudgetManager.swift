@@ -95,6 +95,10 @@ final class BudgetManager {
     }
   }
 
+  func clearAllDigits() {
+    currentInput = "0"
+  }
+
   func confirmExpense() {
     guard currentAmount > 0 else { return }
     remainingBudget -= currentAmount

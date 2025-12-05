@@ -51,6 +51,11 @@ struct ContentView: View {
               budgetManager.deleteLastDigit()
             }
           },
+          onClearAll: {
+            withAnimation(.spring(response: 0.3)) {
+              budgetManager.clearAllDigits()
+            }
+          },
           onConfirm: {
             withAnimation(.easeInOut(duration: 0.5)) {
               budgetManager.confirmExpense()
