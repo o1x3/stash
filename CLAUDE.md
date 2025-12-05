@@ -43,7 +43,8 @@ Stash/
     ├── NumberPadView.swift     # Calculator keypad
     ├── AmountDisplayView.swift # Amount display
     ├── CategorySelectorView.swift # Category pills
-    └── BudgetBarView.swift     # Budget progress bar
+    ├── BudgetBarView.swift     # Budget progress bar
+    └── TagInputView.swift      # Expandable tag input with glass effect
 ```
 
 ### State Management
@@ -51,7 +52,7 @@ Stash/
 `BudgetManager` is the central state container using `@Observable`:
 - `remainingBudget`: Persisted via UserDefaults, resets at midnight
 - `currentInput`: String input from number pad
-- `selectedCategory`: Current expense category
+- `currentTag`: String tag for the current expense (default: "Tag")
 - Computed: `budgetPercentage`, `budgetColor`, `isOverBudget`
 
 UserDefaults keys: `remainingBudget`, `lastBudgetDate`, `hasSetBudget`
@@ -64,17 +65,17 @@ UserDefaults keys: `remainingBudget`, `lastBudgetDate`, `hasSetBudget`
 | 25-50% | Yellow | #FFC107 |
 | 50-100% | Green | #4CAF50 |
 
+### Color Assets
+All colors in `Assets.xcassets` support light/dark mode:
+- `AccentColor`, `AccentPrimary` - UI accent colors
+- `AppBackground` - Main background
+- `BudgetGreen`, `BudgetYellow`, `BudgetRed`, `BudgetOverRed` - Budget status colors
+
 ## Key Implementation Notes
 
-- **iOS 26 Liquid Glass Effects:** UI uses `.glassEffect()` modifier and `GlassEffectContainer` components
+- **iOS 26 Liquid Glass Effects:** UI uses `.glassEffect()` modifier and `.buttonStyle(.glass)`
+- **Light/Dark Mode:** All color assets are adaptive
 - **Haptic Feedback:** Integrated throughout button interactions
 - **Animations:** Spring animations with `.numericText()` content transitions
 - **Input Validation:** Max 2 decimal places, leading zero handling
 
-## Specification
-
-See `spec.md` for complete specification including:
-- Detailed component API contracts
-- Exact color values and spacing measurements
-- Animation timing specifications
-- Complete data model definitions
