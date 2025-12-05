@@ -34,13 +34,13 @@ struct AmountDisplayView: View {
       HStack(spacing: 4) {
         // Currency symbol
         Text(currencySymbol)
-          .font(.system(size: 48, weight: .medium, design: .rounded))
+          .font(.system(size: 48, weight: .medium, design: .monospaced))
           .foregroundStyle(.secondary)
 
         HStack(spacing: 0) {
           // Animated amount text
           Text(formattedAmount)
-            .font(.system(size: 72, weight: .bold, design: .rounded))
+            .font(.system(size: 72, weight: .bold, design: .monospaced))
             .foregroundStyle(.primary)
             .contentTransition(.numericText(countsDown: false))
             .animation(.spring(response: 0.35, dampingFraction: 0.7), value: amount)

@@ -162,7 +162,7 @@ struct SettingsView: View {
                 // Section label
                 Text("DAILY BUDGET")
                     .font(.caption)
-                    .fontWeight(.bold)
+                    .fontWeight(.heavy)
                     .foregroundStyle(.secondary)
                     .tracking(1.2)
 
@@ -218,7 +218,7 @@ struct SettingsView: View {
 
             Text(budgetStatusText(percentage: percentage, remaining: manager.remainingBudget))
                 .font(.subheadline)
-                .fontWeight(.medium)
+                .fontWeight(.heavy)
                 .foregroundStyle(.secondary)
         }
         .padding(.horizontal, 16)
@@ -283,11 +283,12 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(settings.currency.name)
                         .font(.body)
-                        .fontWeight(.semibold)
+                        .fontWeight(.heavy)
                         .foregroundStyle(.primary)
 
                     Text("\(settings.currency.symbol) \(settings.currency.rawValue)")
                         .font(.subheadline)
+                        .fontWeight(.heavy)
                         .foregroundStyle(.secondary)
                 }
 
@@ -313,39 +314,50 @@ struct SettingsView: View {
             // Section header
             Text("PREFERENCES")
                 .font(.caption)
-                .fontWeight(.bold)
+                .fontWeight(.heavy)
                 .foregroundStyle(.secondary)
                 .tracking(1.2)
                 .padding(.horizontal, 4)
 
-            // Grouped preferences card
-            VStack(spacing: 0) {
-                // Haptic Feedback Toggle
-                GlassToggleRow(
-                    icon: "iphone.radiowaves.left.and.right",
-                    title: "Haptic Feedback",
-                    subtitle: "Feel taps and interactions",
-                    isOn: $settings.hapticsEnabled
-                )
+            // Haptic Feedback Toggle - separate card with native Toggle
+            HStack(spacing: 12) {
+                Image(systemName: "iphone.radiowaves.left.and.right")
+                    .font(.body)
+                    .foregroundStyle(Color("AccentPrimary"))
+                    .frame(width: 24, height: 24)
 
-                // Divider
-                Rectangle()
-                    .fill(Color.white.opacity(0.1))
-                    .frame(height: 0.5)
-                    .padding(.horizontal, 16)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Haptic Feedback")
+                        .font(.body)
+                        .fontWeight(.heavy)
+                        .foregroundStyle(.primary)
 
-                // Warning Threshold Slider
-                GlassSliderRow(
-                    icon: "exclamationmark.triangle",
-                    title: "Low Budget Warning",
-                    value: $settings.budgetWarningThreshold,
-                    range: 0.1...0.5,
-                    step: 0.05,
-                    valueFormatter: { value in
-                        "at \(Int(value * 100))%"
-                    }
-                )
+                    Text("Feel taps and interactions")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Toggle("", isOn: $settings.hapticsEnabled)
+                    .labelsHidden()
+                    .tint(Color("AccentPrimary"))
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .glassEffect(.regular, in: .rect(cornerRadius: 20))
+
+            // Warning Threshold Slider - separate card
+            GlassSliderRow(
+                icon: "exclamationmark.triangle",
+                title: "Low Budget Warning",
+                value: $settings.budgetWarningThreshold,
+                range: 0.1...0.5,
+                step: 0.05,
+                valueFormatter: { value in
+                    "at \(Int(value * 100))%"
+                }
+            )
             .glassEffect(.regular, in: .rect(cornerRadius: 20))
         }
     }
@@ -359,11 +371,11 @@ struct SettingsView: View {
             HStack(spacing: 10) {
                 Image(systemName: "arrow.counterclockwise")
                     .font(.body)
-                    .fontWeight(.medium)
+                    .fontWeight(.heavy)
 
                 Text("Reset Today's Budget")
                     .font(.body)
-                    .fontWeight(.semibold)
+                    .fontWeight(.heavy)
             }
             .foregroundStyle(.red)
             .frame(height: 56)

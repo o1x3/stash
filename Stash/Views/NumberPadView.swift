@@ -89,7 +89,7 @@ struct NumberButton: View {
     }) {
       Text(label)
         .font(.title)
-        .fontWeight(.medium)
+        .fontWeight(.heavy)
         .foregroundStyle(.primary)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -110,7 +110,7 @@ struct DeleteButton: View {
   var body: some View {
     Image(systemName: "delete.left")
       .font(.title2)
-      .fontWeight(.medium)
+      .fontWeight(.heavy)
       .foregroundStyle(.primary)
       .frame(maxWidth: .infinity, maxHeight: .infinity)
       .frame(height: 56)
@@ -154,7 +154,7 @@ struct ConfirmButton: View {
     }) {
       Image(systemName: "checkmark")
         .font(.title)
-        .fontWeight(.bold)
+        .fontWeight(.heavy)
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

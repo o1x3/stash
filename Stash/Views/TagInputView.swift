@@ -33,7 +33,7 @@ struct TagInputView: View {
         // Collapsed label - slides left into icon, then shrinks
         Text(truncatedSavedName)
           .font(.subheadline)
-          .fontWeight(.medium)
+          .fontWeight(.heavy)
           .foregroundStyle(.primary)
           .lineLimit(1)
           .offset(x: isExpanded ? -30 : 0)

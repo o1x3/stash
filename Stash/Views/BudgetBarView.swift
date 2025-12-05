@@ -50,10 +50,11 @@ struct BudgetBarView: View {
         // Layer 4: Text content
         HStack {
           Text("For today")
+            .fontWeight(.heavy)
             .foregroundStyle(.primary.opacity(0.7))
           Spacer()
           Text(formattedBudget)
-            .fontWeight(.semibold)
+            .fontWeight(.heavy)
             .foregroundStyle(isOverBudget ? Color("BudgetRed") : .primary)
             .contentTransition(.numericText())
             .animation(.spring(response: 0.4, dampingFraction: 0.8), value: remainingBudget)
