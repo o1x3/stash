@@ -10,6 +10,11 @@ struct NumberPadView: View {
   let onDelete: () -> Void
   let onConfirm: () -> Void
 
+  // Reusable haptic generators - created once, reused for all taps
+  // This prevents latency from Taptic Engine wake-up on rapid taps
+  private let lightHaptic = UIImpactFeedbackGenerator(style: .light)
+  private let mediumHaptic = UIImpactFeedbackGenerator(style: .medium)
+
   private let buttonSpacing: CGFloat = 12
   private let buttonHeight: CGFloat = 56
 
@@ -20,41 +25,46 @@ struct NumberPadView: View {
         VStack(spacing: buttonSpacing) {
           // Row 1: 7, 8, 9
           HStack(spacing: buttonSpacing) {
-            NumberButton(label: "7") { onDigit("7") }
-            NumberButton(label: "8") { onDigit("8") }
-            NumberButton(label: "9") { onDigit("9") }
+            NumberButton(label: "7", haptic: lightHaptic) { onDigit("7") }
+            NumberButton(label: "8", haptic: lightHaptic) { onDigit("8") }
+            NumberButton(label: "9", haptic: lightHaptic) { onDigit("9") }
           }
           // Row 2: 4, 5, 6
           HStack(spacing: buttonSpacing) {
-            NumberButton(label: "4") { onDigit("4") }
-            NumberButton(label: "5") { onDigit("5") }
-            NumberButton(label: "6") { onDigit("6") }
+            NumberButton(label: "4", haptic: lightHaptic) { onDigit("4") }
+            NumberButton(label: "5", haptic: lightHaptic) { onDigit("5") }
+            NumberButton(label: "6", haptic: lightHaptic) { onDigit("6") }
           }
           // Row 3: 1, 2, 3
           HStack(spacing: buttonSpacing) {
-            NumberButton(label: "1") { onDigit("1") }
-            NumberButton(label: "2") { onDigit("2") }
-            NumberButton(label: "3") { onDigit("3") }
+            NumberButton(label: "1", haptic: lightHaptic) { onDigit("1") }
+            NumberButton(label: "2", haptic: lightHaptic) { onDigit("2") }
+            NumberButton(label: "3", haptic: lightHaptic) { onDigit("3") }
           }
           // Row 4: 0 (wide), .
           HStack(spacing: buttonSpacing) {
-            NumberButton(label: "0", isWide: true) { onDigit("0") }
-            NumberButton(label: ".") { onDigit(".") }
+            NumberButton(label: "0", isWide: true, haptic: lightHaptic) { onDigit("0") }
+            NumberButton(label: ".", haptic: lightHaptic) { onDigit(".") }
           }
         }
 
         // Right side: Delete + Confirm stack
         VStack(spacing: buttonSpacing) {
           // Delete button (single row height)
-          DeleteButton { onDelete() }
+          DeleteButton(haptic: lightHaptic) { onDelete() }
 
           // Confirm button (spans remaining 3 rows)
-          ConfirmButton { onConfirm() }
+          ConfirmButton(haptic: mediumHaptic) { onConfirm() }
             .frame(height: buttonHeight * 3 + buttonSpacing * 2)
         }
         .frame(width: 72)
       }
       .padding(.horizontal, 20)
+    }
+    .onAppear {
+      // Pre-warm the Taptic Engine for lowest latency on first tap
+      lightHaptic.prepare()
+      mediumHaptic.prepare()
     }
   }
 }
@@ -62,11 +72,13 @@ struct NumberPadView: View {
 struct NumberButton: View {
   let label: String
   var isWide: Bool = false
+  let haptic: UIImpactFeedbackGenerator
   let action: () -> Void
 
   var body: some View {
     Button(action: {
-      UIImpactFeedbackGenerator(style: .light).impactOccurred()
+      haptic.impactOccurred()
+      haptic.prepare()  // Re-prepare for next rapid tap
       action()
     }) {
       Text(label)
@@ -82,11 +94,13 @@ struct NumberButton: View {
 }
 
 struct DeleteButton: View {
+  let haptic: UIImpactFeedbackGenerator
   let action: () -> Void
 
   var body: some View {
     Button(action: {
-      UIImpactFeedbackGenerator(style: .light).impactOccurred()
+      haptic.impactOccurred()
+      haptic.prepare()  // Re-prepare for next rapid tap
       action()
     }) {
       Image(systemName: "delete.left")
@@ -101,11 +115,13 @@ struct DeleteButton: View {
 }
 
 struct ConfirmButton: View {
+  let haptic: UIImpactFeedbackGenerator
   let action: () -> Void
 
   var body: some View {
     Button(action: {
-      UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+      haptic.impactOccurred()
+      haptic.prepare()  // Re-prepare for next rapid tap
       action()
     }) {
       Image(systemName: "checkmark")

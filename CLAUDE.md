@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Claude Code Instructions
+
+- **Always use sosumi MCP extensively** for Apple documentation lookups (searchAppleDocumentation, fetchAppleDocumentation)
+- **Always use iPhone 17 Pro simulator** for builds after code changes
+- **Build command:** `mcp__XcodeBuildMCP__build_run_sim` with `simulatorName: "iPhone 17 Pro"`
+
 ## Project Overview
 
 Stash is a minimalist iOS expense tracking app for daily budget management. Users set a daily spending limit ($100 hardcoded) and log expenses using a calculator-style interface. The app resets automatically at midnight.
