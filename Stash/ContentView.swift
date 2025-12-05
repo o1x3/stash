@@ -36,34 +36,41 @@ struct ContentView: View {
       Color("AppBackground")
         .ignoresSafeArea()
 
-      GlassEffectContainer(spacing: 40) {
-        ZStack {
-          // Main content (fades when settings shown)
-          mainContent
-            .opacity(showSettings ? 0 : 1)
-            .animation(.easeInOut(duration: 0.3), value: showSettings)
-            .allowsHitTesting(!showSettings)
+      // Main content - hide when settings shown (no opacity animation to avoid flicker)
+      if !showSettings {
+        mainContent
+      }
 
-          // Settings overlay (morphs from gear)
-          if showSettings {
-            SettingsView(
-              settings: settings,
-              onDismiss: {
-                withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
-                  showSettings = false
-                }
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-              },
-              onResetBudget: {
-                budgetManager.resetBudget()
-              }
-            )
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .glassEffect(.regular, in: .rect(cornerRadius: 32))
-            .glassEffectID("settings", in: settingsNamespace)
-            .transition(.opacity.combined(with: .scale(scale: 0.95)))
+      // Gear button container (isolated, only contains the gear)
+      GlassEffectContainer(spacing: 40) {
+        if !showSettings {
+          VStack {
+            HStack {
+              Spacer()
+              settingsButton
+                .padding(.top, 8)
+                .padding(.trailing, 16)
+            }
+            Spacer()
           }
         }
+      }
+
+      // Settings view - OUTSIDE the glass container to prevent internal blending
+      if showSettings {
+        SettingsView(
+          settings: settings,
+          onDismiss: {
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
+              showSettings = false
+            }
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+          },
+          onResetBudget: {
+            budgetManager.resetBudget()
+          }
+        )
+        .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .topTrailing)))
       }
     }
     .onReceive(
@@ -141,14 +148,9 @@ struct ContentView: View {
         currencySymbol: settings.currencySymbol
       )
 
-      // Settings gear button with glass morph ID
-      if !showSettings {
-        settingsButton
-      } else {
-        // Invisible placeholder to maintain layout
-        Color.clear
-          .frame(width: 48, height: 48)
-      }
+      // Placeholder for layout (gear is now positioned absolutely in body)
+      Color.clear
+        .frame(width: 48, height: 48)
     }
     .padding(.horizontal, 16)
   }
@@ -168,7 +170,6 @@ struct ContentView: View {
         .frame(width: 48, height: 48)
     }
     .glassEffect(.regular.interactive(), in: .capsule)
-    .glassEffectID("settings", in: settingsNamespace)
   }
 }
 

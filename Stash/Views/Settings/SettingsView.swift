@@ -30,7 +30,7 @@ struct SettingsView: View {
           VStack(spacing: 24) {
             // Budget Section
             settingsSection("Budget") {
-              VStack(spacing: 2) {
+              VStack(spacing: 12) {
                 SettingsRow(
                   icon: "dollarsign.circle.fill",
                   title: "Daily Limit",
