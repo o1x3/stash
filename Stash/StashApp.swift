@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct StashApp: App {
+  @State private var settings = SettingsManager()
+
   var body: some Scene {
     WindowGroup {
-      ContentView()
+      ContentView(settings: settings)
     }
   }
 }

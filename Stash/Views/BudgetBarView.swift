@@ -10,12 +10,13 @@ struct BudgetBarView: View {
   let percentage: Double
   let budgetColor: Color
   let isOverBudget: Bool
+  var currencySymbol: String = "$"
 
   private var formattedBudget: String {
     if isOverBudget {
-      return "-" + String(format: "%.2f", abs(remainingBudget))
+      return "-" + currencySymbol + String(format: "%.2f", abs(remainingBudget))
     }
-    return String(format: "%.2f", remainingBudget)
+    return currencySymbol + String(format: "%.2f", remainingBudget)
   }
 
   var body: some View {

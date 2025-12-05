@@ -8,9 +8,16 @@ import SwiftUI
 
 @Observable
 final class BudgetManager {
-  private let dailyBudget: Double = 100.0
   private let budgetKey = "remainingBudget"
   private let dateKey = "lastBudgetDate"
+
+  // MARK: - Settings Dependency
+
+  private var settings: SettingsManager
+
+  var dailyBudget: Double {
+    settings.dailyBudget
+  }
 
   var remainingBudget: Double {
     didSet {
@@ -33,7 +40,7 @@ final class BudgetManager {
     let percentage = remainingBudget / dailyBudget
     if percentage <= 0 {
       return Color("BudgetOverRed")
-    } else if percentage <= 0.25 {
+    } else if percentage <= settings.budgetWarningThreshold {
       return Color("BudgetRed")
     } else if percentage <= 0.5 {
       return Color("BudgetYellow")
@@ -47,26 +54,30 @@ final class BudgetManager {
   }
 
   var formattedRemainingBudget: String {
-    if isOverBudget {
-      return "-" + String(format: "%.2f", abs(remainingBudget))
-    }
-    return String(format: "%.2f", remainingBudget)
+    settings.formatBudgetAmount(remainingBudget)
   }
 
-  init() {
+  init(settings: SettingsManager) {
+    self.settings = settings
+
     let savedDate = UserDefaults.standard.string(forKey: dateKey) ?? ""
     let today = Self.todayString()
 
     if savedDate == today {
       self.remainingBudget = UserDefaults.standard.double(forKey: budgetKey)
       if self.remainingBudget == 0 && !UserDefaults.standard.bool(forKey: "hasSetBudget") {
-        self.remainingBudget = dailyBudget
+        self.remainingBudget = settings.dailyBudget
         UserDefaults.standard.set(true, forKey: "hasSetBudget")
       }
     } else {
-      self.remainingBudget = dailyBudget
+      self.remainingBudget = settings.dailyBudget
       UserDefaults.standard.set(today, forKey: dateKey)
       UserDefaults.standard.set(true, forKey: "hasSetBudget")
+    }
+
+    // Set up proportional budget scaling when settings change
+    settings.onBudgetChanged = { [weak self] oldBudget, newBudget in
+      self?.adjustBudgetProportionally(from: oldBudget, to: newBudget)
     }
   }
 
@@ -113,7 +124,7 @@ final class BudgetManager {
   }
 
   func resetBudget() {
-    remainingBudget = dailyBudget
+    remainingBudget = settings.dailyBudget
     UserDefaults.standard.set(Self.todayString(), forKey: dateKey)
   }
 
@@ -124,6 +135,24 @@ final class BudgetManager {
     if savedDate != today {
       resetBudget()
     }
+  }
+
+  // MARK: - Proportional Budget Scaling
+
+  /// When daily budget changes mid-day, scale remaining budget proportionally
+  /// Example: $100 budget with $40 remaining (40%) -> $150 budget = $60 remaining (still 40%)
+  private func adjustBudgetProportionally(from oldBudget: Double, to newBudget: Double) {
+    guard oldBudget > 0 else {
+      // First time setting budget or invalid old value
+      remainingBudget = newBudget
+      return
+    }
+
+    // Calculate what percentage of budget remains
+    let percentageRemaining = remainingBudget / oldBudget
+
+    // Apply same percentage to new budget
+    remainingBudget = newBudget * percentageRemaining
   }
 
   private static func todayString() -> String {

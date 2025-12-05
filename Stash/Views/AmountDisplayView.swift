@@ -7,6 +7,7 @@ import SwiftUI
 
 struct AmountDisplayView: View {
   let amount: String
+  var currencySymbol: String = "$"
   @State private var cursorOpacity: Double = 1.0
 
   private var formattedAmount: String {
@@ -30,30 +31,37 @@ struct AmountDisplayView: View {
   var body: some View {
     HStack {
       Spacer()
-      HStack(spacing: 0) {
-        // Animated amount text
-        Text(formattedAmount)
-          .font(.system(size: 72, weight: .bold, design: .rounded))
-          .foregroundStyle(.primary)
-          .contentTransition(.numericText(countsDown: false))
-          .animation(.spring(response: 0.35, dampingFraction: 0.7), value: amount)
-          .transaction { transaction in
-            transaction.animation = .spring(response: 0.35, dampingFraction: 0.7)
-          }
+      HStack(spacing: 4) {
+        // Currency symbol
+        Text(currencySymbol)
+          .font(.system(size: 48, weight: .medium, design: .rounded))
+          .foregroundStyle(.secondary)
 
-        // Animated cursor line (blinking)
-        Rectangle()
-          .fill(Color("AccentPrimary"))
-          .frame(width: 3, height: 56)
-          .opacity(cursorOpacity)
-          .animation(
-            .easeInOut(duration: 0.6)
-              .repeatForever(autoreverses: true),
-            value: cursorOpacity
-          )
-          .onAppear {
-            cursorOpacity = 0.3
-          }
+        HStack(spacing: 0) {
+          // Animated amount text
+          Text(formattedAmount)
+            .font(.system(size: 72, weight: .bold, design: .rounded))
+            .foregroundStyle(.primary)
+            .contentTransition(.numericText(countsDown: false))
+            .animation(.spring(response: 0.35, dampingFraction: 0.7), value: amount)
+            .transaction { transaction in
+              transaction.animation = .spring(response: 0.35, dampingFraction: 0.7)
+            }
+
+          // Animated cursor line (blinking)
+          Rectangle()
+            .fill(Color("AccentPrimary"))
+            .frame(width: 3, height: 56)
+            .opacity(cursorOpacity)
+            .animation(
+              .easeInOut(duration: 0.6)
+                .repeatForever(autoreverses: true),
+              value: cursorOpacity
+            )
+            .onAppear {
+              cursorOpacity = 0.3
+            }
+        }
       }
       .padding(.trailing, 24)
     }

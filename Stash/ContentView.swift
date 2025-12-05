@@ -8,61 +8,62 @@
 import SwiftUI
 
 struct ContentView: View {
-  @State private var budgetManager = BudgetManager()
+  // MARK: - Dependencies
+
+  var settings: SettingsManager
+  @State private var budgetManager: BudgetManager
+
+  // MARK: - State
+
   @State private var isTagExpanded = false
   @FocusState private var isTagFieldFocused: Bool
+
+  // Settings transition state
+  @State private var showSettings = false
+  @Namespace private var settingsNamespace
+
+  // MARK: - Initialization
+
+  init(settings: SettingsManager) {
+    self.settings = settings
+    self._budgetManager = State(initialValue: BudgetManager(settings: settings))
+  }
+
+  // MARK: - Body
 
   var body: some View {
     ZStack {
       Color("AppBackground")
         .ignoresSafeArea()
 
-      VStack(spacing: 0) {
-        // Header: Budget Bar + Settings
-        headerSection
-          .padding(.top, 8)
+      GlassEffectContainer(spacing: 40) {
+        ZStack {
+          // Main content (fades when settings shown)
+          mainContent
+            .opacity(showSettings ? 0 : 1)
+            .animation(.easeInOut(duration: 0.3), value: showSettings)
+            .allowsHitTesting(!showSettings)
 
-        Spacer()
-
-        // Amount Display (right-aligned)
-        AmountDisplayView(amount: budgetManager.currentInput)
-          .padding(.bottom, 32)
-
-        Spacer()
-
-        // Tag Button/Input
-        TagInputView(
-          isExpanded: $isTagExpanded,
-          savedTagName: $budgetManager.currentTag,
-          isFocused: $isTagFieldFocused
-        )
-        .padding(.horizontal, 16)
-        .padding(.bottom, 16)
-
-        // Number Pad
-        NumberPadView(
-          onDigit: { digit in
-            withAnimation(.spring(response: 0.3)) {
-              budgetManager.appendDigit(digit)
-            }
-          },
-          onDelete: {
-            withAnimation(.spring(response: 0.3)) {
-              budgetManager.deleteLastDigit()
-            }
-          },
-          onClearAll: {
-            withAnimation(.spring(response: 0.3)) {
-              budgetManager.clearAllDigits()
-            }
-          },
-          onConfirm: {
-            withAnimation(.easeInOut(duration: 0.5)) {
-              budgetManager.confirmExpense()
-            }
+          // Settings overlay (morphs from gear)
+          if showSettings {
+            SettingsView(
+              settings: settings,
+              onDismiss: {
+                withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
+                  showSettings = false
+                }
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+              },
+              onResetBudget: {
+                budgetManager.resetBudget()
+              }
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .glassEffect(.regular, in: .rect(cornerRadius: 32))
+            .glassEffectID("settings", in: settingsNamespace)
+            .transition(.opacity.combined(with: .scale(scale: 0.95)))
           }
-        )
-        .padding(.bottom, 24)
+        }
       }
     }
     .onReceive(
@@ -72,24 +73,102 @@ struct ContentView: View {
     }
   }
 
+  // MARK: - Main Content
+
+  private var mainContent: some View {
+    VStack(spacing: 0) {
+      // Header: Budget Bar + Settings
+      headerSection
+        .padding(.top, 8)
+
+      Spacer()
+
+      // Amount Display (right-aligned)
+      AmountDisplayView(
+        amount: budgetManager.currentInput,
+        currencySymbol: settings.currencySymbol
+      )
+      .padding(.bottom, 32)
+
+      Spacer()
+
+      // Tag Button/Input
+      TagInputView(
+        isExpanded: $isTagExpanded,
+        savedTagName: $budgetManager.currentTag,
+        isFocused: $isTagFieldFocused
+      )
+      .padding(.horizontal, 16)
+      .padding(.bottom, 16)
+
+      // Number Pad
+      NumberPadView(
+        onDigit: { digit in
+          withAnimation(.spring(response: 0.3)) {
+            budgetManager.appendDigit(digit)
+          }
+        },
+        onDelete: {
+          withAnimation(.spring(response: 0.3)) {
+            budgetManager.deleteLastDigit()
+          }
+        },
+        onClearAll: {
+          withAnimation(.spring(response: 0.3)) {
+            budgetManager.clearAllDigits()
+          }
+        },
+        onConfirm: {
+          withAnimation(.easeInOut(duration: 0.5)) {
+            budgetManager.confirmExpense()
+          }
+        },
+        hapticsEnabled: settings.hapticsEnabled
+      )
+      .padding(.bottom, 24)
+    }
+  }
+
+  // MARK: - Header Section
+
   private var headerSection: some View {
     HStack(spacing: 12) {
       BudgetBarView(
         remainingBudget: budgetManager.remainingBudget,
         percentage: budgetManager.budgetPercentage,
         budgetColor: budgetManager.budgetColor,
-        isOverBudget: budgetManager.isOverBudget
+        isOverBudget: budgetManager.isOverBudget,
+        currencySymbol: settings.currencySymbol
       )
 
-      Button(action: {}) {
-        Image(systemName: "gearshape.fill")
-          .font(.title2)
-          .foregroundStyle(.secondary)
+      // Settings gear button with glass morph ID
+      if !showSettings {
+        settingsButton
+      } else {
+        // Invisible placeholder to maintain layout
+        Color.clear
           .frame(width: 48, height: 48)
       }
-      .buttonStyle(.glass)
     }
     .padding(.horizontal, 16)
+  }
+
+  // MARK: - Settings Button
+
+  private var settingsButton: some View {
+    Button(action: {
+      withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+        showSettings = true
+      }
+      UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+    }) {
+      Image(systemName: "gearshape.fill")
+        .font(.title2)
+        .foregroundStyle(.secondary)
+        .frame(width: 48, height: 48)
+    }
+    .glassEffect(.regular.interactive(), in: .capsule)
+    .glassEffectID("settings", in: settingsNamespace)
   }
 }
 
@@ -124,5 +203,5 @@ extension Color {
 }
 
 #Preview {
-  ContentView()
+  ContentView(settings: SettingsManager())
 }

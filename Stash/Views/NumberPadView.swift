@@ -10,6 +10,7 @@ struct NumberPadView: View {
   let onDelete: () -> Void
   let onClearAll: () -> Void
   let onConfirm: () -> Void
+  var hapticsEnabled: Bool = true
 
   // Reusable haptic generators - created once, reused for all taps
   // This prevents latency from Taptic Engine wake-up on rapid taps
@@ -26,26 +27,26 @@ struct NumberPadView: View {
         VStack(spacing: buttonSpacing) {
           // Row 1: 7, 8, 9
           HStack(spacing: buttonSpacing) {
-            NumberButton(label: "7", haptic: lightHaptic) { onDigit("7") }
-            NumberButton(label: "8", haptic: lightHaptic) { onDigit("8") }
-            NumberButton(label: "9", haptic: lightHaptic) { onDigit("9") }
+            NumberButton(label: "7", haptic: lightHaptic, hapticsEnabled: hapticsEnabled) { onDigit("7") }
+            NumberButton(label: "8", haptic: lightHaptic, hapticsEnabled: hapticsEnabled) { onDigit("8") }
+            NumberButton(label: "9", haptic: lightHaptic, hapticsEnabled: hapticsEnabled) { onDigit("9") }
           }
           // Row 2: 4, 5, 6
           HStack(spacing: buttonSpacing) {
-            NumberButton(label: "4", haptic: lightHaptic) { onDigit("4") }
-            NumberButton(label: "5", haptic: lightHaptic) { onDigit("5") }
-            NumberButton(label: "6", haptic: lightHaptic) { onDigit("6") }
+            NumberButton(label: "4", haptic: lightHaptic, hapticsEnabled: hapticsEnabled) { onDigit("4") }
+            NumberButton(label: "5", haptic: lightHaptic, hapticsEnabled: hapticsEnabled) { onDigit("5") }
+            NumberButton(label: "6", haptic: lightHaptic, hapticsEnabled: hapticsEnabled) { onDigit("6") }
           }
           // Row 3: 1, 2, 3
           HStack(spacing: buttonSpacing) {
-            NumberButton(label: "1", haptic: lightHaptic) { onDigit("1") }
-            NumberButton(label: "2", haptic: lightHaptic) { onDigit("2") }
-            NumberButton(label: "3", haptic: lightHaptic) { onDigit("3") }
+            NumberButton(label: "1", haptic: lightHaptic, hapticsEnabled: hapticsEnabled) { onDigit("1") }
+            NumberButton(label: "2", haptic: lightHaptic, hapticsEnabled: hapticsEnabled) { onDigit("2") }
+            NumberButton(label: "3", haptic: lightHaptic, hapticsEnabled: hapticsEnabled) { onDigit("3") }
           }
           // Row 4: 0 (wide), .
           HStack(spacing: buttonSpacing) {
-            NumberButton(label: "0", isWide: true, haptic: lightHaptic) { onDigit("0") }
-            NumberButton(label: ".", haptic: lightHaptic) { onDigit(".") }
+            NumberButton(label: "0", isWide: true, haptic: lightHaptic, hapticsEnabled: hapticsEnabled) { onDigit("0") }
+            NumberButton(label: ".", haptic: lightHaptic, hapticsEnabled: hapticsEnabled) { onDigit(".") }
           }
         }
 
@@ -53,10 +54,10 @@ struct NumberPadView: View {
         VStack(spacing: buttonSpacing) {
           // Delete button (single row height)
           // Tap to delete one digit, long press to clear all
-          DeleteButton(haptic: lightHaptic, onDelete: onDelete, onClearAll: onClearAll)
+          DeleteButton(haptic: lightHaptic, hapticsEnabled: hapticsEnabled, onDelete: onDelete, onClearAll: onClearAll)
 
           // Confirm button (spans remaining 3 rows)
-          ConfirmButton(haptic: mediumHaptic) { onConfirm() }
+          ConfirmButton(haptic: mediumHaptic, hapticsEnabled: hapticsEnabled) { onConfirm() }
             .frame(height: buttonHeight * 3 + buttonSpacing * 2)
         }
         .frame(width: 72)
@@ -75,12 +76,15 @@ struct NumberButton: View {
   let label: String
   var isWide: Bool = false
   let haptic: UIImpactFeedbackGenerator
+  var hapticsEnabled: Bool = true
   let action: () -> Void
 
   var body: some View {
     Button(action: {
-      haptic.impactOccurred()
-      haptic.prepare()  // Re-prepare for next rapid tap
+      if hapticsEnabled {
+        haptic.impactOccurred()
+        haptic.prepare()  // Re-prepare for next rapid tap
+      }
       action()
     }) {
       Text(label)
@@ -97,6 +101,7 @@ struct NumberButton: View {
 
 struct DeleteButton: View {
   let haptic: UIImpactFeedbackGenerator
+  var hapticsEnabled: Bool = true
   let onDelete: () -> Void
   let onClearAll: () -> Void
 
@@ -115,13 +120,17 @@ struct DeleteButton: View {
       }
       .glassEffect(.regular.interactive(), in: .capsule)
       .onTapGesture {
-        haptic.impactOccurred()
-        haptic.prepare()
+        if hapticsEnabled {
+          haptic.impactOccurred()
+          haptic.prepare()
+        }
         onDelete()
       }
       .onLongPressGesture(minimumDuration: 0.5) {
-        heavyHaptic.impactOccurred()
-        heavyHaptic.prepare()
+        if hapticsEnabled {
+          heavyHaptic.impactOccurred()
+          heavyHaptic.prepare()
+        }
         onClearAll()
       }
       .onAppear {
@@ -132,12 +141,15 @@ struct DeleteButton: View {
 
 struct ConfirmButton: View {
   let haptic: UIImpactFeedbackGenerator
+  var hapticsEnabled: Bool = true
   let action: () -> Void
 
   var body: some View {
     Button(action: {
-      haptic.impactOccurred()
-      haptic.prepare()  // Re-prepare for next rapid tap
+      if hapticsEnabled {
+        haptic.impactOccurred()
+        haptic.prepare()  // Re-prepare for next rapid tap
+      }
       action()
     }) {
       Image(systemName: "checkmark")
