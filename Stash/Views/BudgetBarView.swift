@@ -23,7 +23,7 @@ struct BudgetBarView: View {
       ZStack(alignment: .leading) {
         // Layer 1: Track background (very subtle)
         Capsule()
-          .fill(Color.gray.opacity(0.1))
+          .fill(Color.primary.opacity(0.08))
 
         // Layer 2: Colored progress fill (animates width)
         Capsule()

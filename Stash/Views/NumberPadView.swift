@@ -96,7 +96,7 @@ struct DeleteButton: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     .frame(height: 56)
-    .buttonStyle(NumberPadButtonStyle(tintColor: Color("AccentPrimary").opacity(0.3)))
+    .buttonStyle(NumberPadButtonStyle(tintColor: Color("AccentPrimary").opacity(0.5)))
   }
 }
 
