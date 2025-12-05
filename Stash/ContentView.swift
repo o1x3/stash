@@ -60,6 +60,7 @@ struct ContentView: View {
       if showSettings {
         SettingsView(
           settings: settings,
+          budgetManager: budgetManager,
           onDismiss: {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
               showSettings = false

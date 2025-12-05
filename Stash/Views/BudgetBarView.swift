@@ -26,11 +26,18 @@ struct BudgetBarView: View {
         Capsule()
           .fill(Color.primary.opacity(0.08))
 
-        // Layer 2: Colored progress fill (animates width)
+        // Layer 2: Colored progress fill with mask (inset capsule for border effect)
+        // Using mask instead of frame width avoids: oval shape at low %, layer misalignment with glass
+        let inset: CGFloat = 3
         Capsule()
+          .inset(by: inset)
           .fill(budgetColor.opacity(0.85))
-          .frame(
-            width: isOverBudget ? geometry.size.width : geometry.size.width * max(0, percentage)
+          .mask(
+            HStack(spacing: 0) {
+              Rectangle()
+                .frame(width: isOverBudget ? geometry.size.width : geometry.size.width * max(0, percentage))
+              Spacer(minLength: 0)
+            }
           )
           .animation(.spring(response: 0.6, dampingFraction: 0.8), value: percentage)
           .animation(.easeInOut(duration: 0.4), value: budgetColor)
