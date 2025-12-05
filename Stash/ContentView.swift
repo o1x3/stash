@@ -84,56 +84,63 @@ struct ContentView: View {
   // MARK: - Main Content
 
   private var mainContent: some View {
-    VStack(spacing: 0) {
-      // Header: Budget Bar + Settings
-      headerSection
-        .padding(.top, 8)
+    ZStack {
+      // Layer 1: Fixed content - ignores keyboard, never moves
+      VStack(spacing: 0) {
+        headerSection
+          .padding(.top, 8)
 
-      Spacer()
+        Spacer()
 
-      // Amount Display (right-aligned)
-      AmountDisplayView(
-        amount: budgetManager.currentInput,
-        currencySymbol: settings.currencySymbol
-      )
-      .padding(.bottom, 32)
+        AmountDisplayView(
+          amount: budgetManager.currentInput,
+          currencySymbol: settings.currencySymbol
+        )
 
-      Spacer()
+        Spacer()
+        Spacer() // Extra spacer to push amount up from center
+      }
+      .ignoresSafeArea(.keyboard)
 
-      // Tag Button/Input
-      TagInputView(
-        isExpanded: $isTagExpanded,
-        savedTagName: $budgetManager.currentTag,
-        isFocused: $isTagFieldFocused
-      )
-      .padding(.horizontal, 16)
-      .padding(.bottom, 16)
+      // Layer 2: Bottom content - NumberPad always in layout, just hidden when keyboard shows
+      VStack(spacing: 0) {
+        TagInputView(
+          isExpanded: $isTagExpanded,
+          savedTagName: $budgetManager.currentTag,
+          isFocused: $isTagFieldFocused
+        )
+        .padding(.horizontal, 16)
+        .padding(.bottom, 16)
 
-      // Number Pad
-      NumberPadView(
-        onDigit: { digit in
-          withAnimation(.spring(response: 0.3)) {
-            budgetManager.appendDigit(digit)
-          }
-        },
-        onDelete: {
-          withAnimation(.spring(response: 0.3)) {
-            budgetManager.deleteLastDigit()
-          }
-        },
-        onClearAll: {
-          withAnimation(.spring(response: 0.3)) {
-            budgetManager.clearAllDigits()
-          }
-        },
-        onConfirm: {
-          withAnimation(.easeInOut(duration: 0.5)) {
-            budgetManager.confirmExpense()
-          }
-        },
-        hapticsEnabled: settings.hapticsEnabled
-      )
-      .padding(.bottom, 24)
+        NumberPadView(
+          onDigit: { digit in
+            withAnimation(.spring(response: 0.3)) {
+              budgetManager.appendDigit(digit)
+            }
+          },
+          onDelete: {
+            withAnimation(.spring(response: 0.3)) {
+              budgetManager.deleteLastDigit()
+            }
+          },
+          onClearAll: {
+            withAnimation(.spring(response: 0.3)) {
+              budgetManager.clearAllDigits()
+            }
+          },
+          onConfirm: {
+            withAnimation(.easeInOut(duration: 0.5)) {
+              budgetManager.confirmExpense()
+            }
+          },
+          hapticsEnabled: settings.hapticsEnabled
+        )
+        .padding(.bottom, 24)
+        .opacity(isTagFieldFocused ? 0 : 1)
+        .allowsHitTesting(!isTagFieldFocused)
+      }
+      .frame(maxHeight: .infinity, alignment: .bottom)
+      .ignoresSafeArea(.keyboard)
     }
   }
 

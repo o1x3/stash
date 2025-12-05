@@ -44,9 +44,6 @@ struct AmountDisplayView: View {
             .foregroundStyle(.primary)
             .contentTransition(.numericText(countsDown: false))
             .animation(.spring(response: 0.35, dampingFraction: 0.7), value: amount)
-            .transaction { transaction in
-              transaction.animation = .spring(response: 0.35, dampingFraction: 0.7)
-            }
 
           // Animated cursor line (blinking)
           Rectangle()

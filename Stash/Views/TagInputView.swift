@@ -102,11 +102,7 @@ struct TagInputView: View {
     }
 
     isExpanded = true
-
-    // Focus after animation settles
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-      isFocused.wrappedValue = true
-    }
+    isFocused.wrappedValue = true  // Focus immediately, no delay
   }
 
   private func confirmTag() {
