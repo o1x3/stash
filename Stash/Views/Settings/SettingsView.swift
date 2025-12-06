@@ -19,9 +19,12 @@ private enum SettingsAnimation {
 
 struct SettingsView: View {
     @Bindable var settings: SettingsManager
+    @Bindable var themeManager: ThemeManager
     let budgetManager: BudgetManager?
     let onDismiss: () -> Void
     let onResetBudget: () -> Void
+
+    @Environment(\.colorScheme) private var colorScheme
 
     @State private var showResetConfirmation = false
     @State private var showCurrencyPicker = false
@@ -31,6 +34,12 @@ struct SettingsView: View {
 
     // Haptic generators
     private let lightHaptic = UIImpactFeedbackGenerator(style: .light)
+
+    // MARK: - Computed Properties
+
+    private var appColors: AppColors {
+        AppColors(themeManager: themeManager, colorScheme: colorScheme)
+    }
 
     var body: some View {
         ZStack {
@@ -52,6 +61,9 @@ struct SettingsView: View {
 
                         // Currency Card
                         currencyCard
+
+                        // Appearance Section
+                        appearanceSection
 
                         // Preferences Section
                         preferencesSection
@@ -94,13 +106,13 @@ struct SettingsView: View {
 
     private var backgroundView: some View {
         ZStack {
-            Color("AppBackground")
+            appColors.appBackground
                 .ignoresSafeArea()
 
             // Subtle ambient gradient
             RadialGradient(
                 colors: [
-                    Color("AccentPrimary").opacity(0.05),
+                    appColors.accentPrimary.opacity(0.05),
                     Color.clear
                 ],
                 center: .topTrailing,
@@ -109,6 +121,33 @@ struct SettingsView: View {
             )
             .ignoresSafeArea()
         }
+    }
+
+    // MARK: - Appearance Section
+
+    private var appearanceSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Section header
+            Text("APPEARANCE")
+                .font(.caption)
+                .fontWeight(.heavy)
+                .foregroundStyle(.secondary)
+                .tracking(1.2)
+                .padding(.horizontal, 4)
+
+            // Theme picker
+            ThemePicker(selection: $themeManager.appTheme, hapticsEnabled: settings.hapticsEnabled)
+
+            // AMOLED toggle - only visible when Dark theme selected
+            if themeManager.appTheme == .dark {
+                AMOLEDToggleRow(isEnabled: $themeManager.isAMOLEDEnabled, hapticsEnabled: settings.hapticsEnabled)
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .move(edge: .top)),
+                        removal: .opacity
+                    ))
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.75), value: themeManager.appTheme)
     }
 
     // MARK: - Header
@@ -323,7 +362,7 @@ struct SettingsView: View {
             HStack(spacing: 12) {
                 Image(systemName: "iphone.radiowaves.left.and.right")
                     .font(.body)
-                    .foregroundStyle(Color("AccentPrimary"))
+                    .foregroundStyle(appColors.accentPrimary)
                     .frame(width: 24, height: 24)
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -341,7 +380,7 @@ struct SettingsView: View {
 
                 Toggle("", isOn: $settings.hapticsEnabled)
                     .labelsHidden()
-                    .tint(Color("AccentPrimary"))
+                    .tint(appColors.accentPrimary)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -403,7 +442,7 @@ struct SettingsView: View {
                     .font(.caption2)
                 Image(systemName: "heart.fill")
                     .font(.caption2)
-                    .foregroundStyle(Color("AccentPrimary"))
+                    .foregroundStyle(appColors.accentPrimary)
             }
             .foregroundStyle(.tertiary)
         }
@@ -755,6 +794,7 @@ private struct PresetButton: View {
 #Preview {
     SettingsView(
         settings: SettingsManager(),
+        themeManager: ThemeManager(),
         budgetManager: nil,
         onDismiss: {},
         onResetBudget: {}

@@ -11,7 +11,12 @@ struct ContentView: View {
   // MARK: - Dependencies
 
   var settings: SettingsManager
+  var themeManager: ThemeManager
   @State private var budgetManager: BudgetManager
+
+  // MARK: - Environment
+
+  @Environment(\.colorScheme) private var colorScheme
 
   // MARK: - State
 
@@ -22,10 +27,17 @@ struct ContentView: View {
   @State private var showSettings = false
   @Namespace private var settingsNamespace
 
+  // MARK: - Computed Properties
+
+  private var appColors: AppColors {
+    AppColors(themeManager: themeManager, colorScheme: colorScheme)
+  }
+
   // MARK: - Initialization
 
-  init(settings: SettingsManager) {
+  init(settings: SettingsManager, themeManager: ThemeManager) {
     self.settings = settings
+    self.themeManager = themeManager
     self._budgetManager = State(initialValue: BudgetManager(settings: settings))
   }
 
@@ -33,7 +45,7 @@ struct ContentView: View {
 
   var body: some View {
     ZStack {
-      Color("AppBackground")
+      appColors.appBackground
         .ignoresSafeArea()
 
       // Main content - hide when settings shown (no opacity animation to avoid flicker)
@@ -60,6 +72,7 @@ struct ContentView: View {
       if showSettings {
         SettingsView(
           settings: settings,
+          themeManager: themeManager,
           budgetManager: budgetManager,
           onDismiss: {
             withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
@@ -212,5 +225,5 @@ extension Color {
 }
 
 #Preview {
-  ContentView(settings: SettingsManager())
+  ContentView(settings: SettingsManager(), themeManager: ThemeManager())
 }
